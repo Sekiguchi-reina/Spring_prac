@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>NewsNote</title>
+</head>
+
+<body>
+
+	<!--	ニュース一覧-->
+	<div id="news-list">
+		<h2>Latest News</h2>
+		<ul id="news-list"></ul>
+		<button onclick='getnews()'>Get news!!!!</button>
+	</div>
+
+	<!--	仮想ノート-->
+	<div id="virtural-note">
+		<h2>Virtual Note</h2>
+		<textarea id="note-content" rows="10" cols="50"></textarea>
+		<button onclick="saveNote()">Save Note</button>
+
+	</div>
+
+	<script>
+		function getnews() {
+			//ニュースAPIからデータ取得
+			fetch('http://newsapi.org/v2/top-headlines?country=jp&apikey=06d4ac883c8e400496cc9ebd9cd78085')
+				.then(response => response.json())
+				.then(data => {
+					const newsList = document.getElementById('news-list');
+					//ニュース一覧をリストに表示
+					data.articles.forEach(article => {
+						const liseItem = document.createElement('div');
+						listItem.innerHTML = `<h3></h3><p>/p>`;
+						newsList.appendChild(liseItem);
+					});
+				})
+				.catch(error => console.error('Error fetching news:', error))
+		}
+
+		//ページ読み込み時にニュースを取得
+		window.onload = getNews;
+	</script>
+</body>
+
+</html>
