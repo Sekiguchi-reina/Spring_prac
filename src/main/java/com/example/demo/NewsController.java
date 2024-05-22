@@ -1,22 +1,40 @@
 package com.example.demo;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class NewsController {
-	
+
 	@Autowired
 	private NewsService newsService;
-	
+
 	@GetMapping("/index")
-	public List<Article> getNews(){
-		return newsService.fetchNews();
-		}
+	public List<Article> getNews() throws InterruptedException, ExecutionException {
+		return newsService.fetchNews().get();
+	}
 	
+	@GetMapping("index")
+	public String getNews(Model model) {
+		List<Article> articles = null;
+		try {
+			articles = newsService.fetchNews().get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		model.addAttribute("articles",articles);
+		return "index";
+	}
+}
+//	public List<Article> getNews(){
+//		return newsService.fetchNews();
+//		}
+
 //	@GetMapping("/index")
 //	public String showNewsList(Model model) {
 //		model.addAttribute("newsList",newsService.getNewsList());
@@ -42,5 +60,3 @@ public class NewsController {
 //    public News getNewDetail(@PathVariable Integer id) {
 //        return newsService.getNewsDetail(id);
 //    }
-
-}

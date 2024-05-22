@@ -7,23 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class Article {
-	
+public class Note {
 	@Id
 	@GeneratedValue
 	private int id;
 	
-	private String title;
-	private String description;
-	private String url;
-	
-	public Article(String title,String description,String url) {
-		this.title = title;
-		this.description = description;
-		this.url = url;
+	private String content;
+	private String createdAt;
+	public Note(String content,String createdAt) {
+		this.content = content;
+		this.createdAt = createdAt;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.kwabenaberko.newsapilib.NewsApiClient;
@@ -14,21 +15,19 @@ import com.kwabenaberko.newsapilib.models.response.ArticleResponse;
 @Service
 public class NewsService {
 
-	//	//データベース操作が必要ならリポジトリが要る
-	//	@Autowired
-	//	private NewsRepository newsRepository;
-
 	@Value("${news.api.key}")
 	private String apikey;
 
 	//NewsAPIからデータ取得
 	//	private static final String NEWS_API_URL = "http://newsapi.org/v2/top-headlines?country=jp&apikey=06d4ac883c8e400496cc9ebd9cd78085";
 
-	public List<Article> fetchNews() {
+	@Async
+	public CompletableFuture<List<Article>> fetchNews(){
+//	public List<Article> fetchNews() {
 		NewsApiClient newsApiClient = new NewsApiClient(apikey);
-		List<Article> articles = new ArrayList<>();
-		
-		CompletableFuture<Void> future = new CompletableFuture<>();
+		CompletableFuture<List<Article>> future = new CompletableFuture<>();
+//		List<Article> articles = new ArrayList<>();
+//		CompletableFuture<Void> future = new CompletableFuture<>();
 
 			newsApiClient.getTopHeadlines(
 					new TopHeadlinesRequest.Builder()
@@ -39,8 +38,13 @@ public class NewsService {
 
 						@Override
 						public void onSuccess(ArticleResponse response) {
+							List<Article> articles = new ArrayList<>();
 							if(response != null && response.getArticles() != null) {
-								articles.addAll(response.getArticles());
+								for (Object obj : response.getArticles()) {
+									if (obj instanceof Article) {
+										articles.add((Article) obj);
+									}
+								}
 							}
 								future.complete(null);
 						}
@@ -52,9 +56,9 @@ public class NewsService {
 						}
 					});
 			
-		future.join();
-
-		return articles;
+			return future;
+//		future.join();
+//		return articles;
 	}
 }
 //ニュース記事のリストを格納する変数
