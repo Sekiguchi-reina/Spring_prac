@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,22 +16,41 @@ public class NewsController {
 	private NewsService newsService;
 
 	@GetMapping("/index")
-	public List<Article> getNews() throws InterruptedException, ExecutionException {
-		return newsService.fetchNews().get();
-	}
-	
-	@GetMapping("index")
 	public String getNews(Model model) {
-		List<Article> articles = null;
-		try {
-			articles = newsService.fetchNews().get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		model.addAttribute("articles",articles);
-		return "index";
+	    CompletableFuture<List<Article>> futureArticles = newsService.fetchNews();
+
+	    try {
+	        List<Article> articles = futureArticles.get(); // 非同期処理の完了を待機
+	        if (articles != null) {
+	            model.addAttribute("articles", articles);
+	            return "index";
+	        } else {
+	            return "error";
+	        }
+	    } catch (InterruptedException | ExecutionException e) {
+	        e.printStackTrace();
+	        return "error";
+	    }
 	}
 }
+
+//	@GetMapping("/index")
+//	public List<Article> getNews() throws InterruptedException, ExecutionException {
+//		return newsService.fetchNews().get();
+//	}
+
+//	@GetMapping("index")
+//	public String getNews(Model model) {
+//		List<Article> articles = null;
+//		try {
+//			articles = newsService.fetchNews().get();
+//		} catch (InterruptedException | ExecutionException e) {
+//			e.printStackTrace();
+//		}
+//		model.addAttribute("articles",articles);
+//		return "index";
+//	}
+//}
 //	public List<Article> getNews(){
 //		return newsService.fetchNews();
 //		}

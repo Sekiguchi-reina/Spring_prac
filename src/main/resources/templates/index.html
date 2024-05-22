@@ -1,48 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>NewsNote</title>
+	<title>Note</title>
 </head>
 
 <body>
 
 	<!--	ニュース一覧-->
-	<div id="news-list">
-		<h2>Latest News</h2>
-		<ul id="news-list"></ul>
-		<button onclick='getnews()'>Get news!!!!</button>
-	</div>
+<!--	<div id="news-list">-->
+<!--		<h2>Latest News</h2>-->
+<!--		<ul>-->
+<!--			<li th:if="${articles != null}" th:each="article : ${articles}">-->
+<!--				<h3 th:text="${article.title}"></h3>-->
+<!--				<p th:text="${article.description}"></p>-->
+<!--			</li>-->
+<!--		</ul>-->
+<!--		<button onclick='getnews()'>Get news</button>-->
+<!--	</div>-->
 
 	<!--	仮想ノート-->
 	<div id="virtural-note">
-		<h2>Virtual Note</h2>
-		<textarea id="note-content" rows="10" cols="50"></textarea>
-		<button onclick="saveNote()">Save Note</button>
-
-	</div>
+			<h2>Virtual Note</h2>
+			<textarea id="note-content" rows="10" cols="50"></textarea>
+			<button onclick="saveNote()">Save Note</button>
+			<button onclick="clearTextArea()">Clear Text</button>
+	
+		</div>
+		<div>
+			<h2>Note List</h2>
+			<ul id = "note-list">
+				<li th:each = "note : ${notes}">
+					<p th:text = "${note.content}"></p>
+					<p th:text = "${note.createdAt}"></p>
+				</li> 
+			</ul>
+		</div>
 
 	<script>
-		function getnews() {
-			//ニュースAPIからデータ取得
-			fetch('http://newsapi.org/v2/top-headlines?country=jp&apikey=06d4ac883c8e400496cc9ebd9cd78085')
-				.then(response => response.json())
-				.then(data => {
-					const newsList = document.getElementById('news-list');
-					//ニュース一覧をリストに表示
-					data.articles.forEach(article => {
-						const liseItem = document.createElement('div');
-						listItem.innerHTML = `<h3></h3><p>/p>`;
-						newsList.appendChild(liseItem);
-					});
-				})
-				.catch(error => console.error('Error fetching news:', error))
-		}
+		//function getnews() {
+		//	//ニュースAPIからデータ取得
+		//	fetch('http://newsapi.org/v2/top-headlines?country=jp&apikey=06d4ac883c8e400496cc9ebd9cd78085')
+		//		.then(response => response.json())
+		//		.then(data => {
+		//			const newsList = document.getElementById('news-list');
+		//			//ニュース一覧をリストに表示
+		//			data.articles.forEach(article => {
+		//				const liseItem = document.createElement('li');
+		//				listItem.innerHTML = `<h3>{article.title}</h3><p>${article.description}</p>`;
+		//				newsList.appendChild(liseItem);
+		//			});
+		//		})
+		//		.catch(error => console.error('Error fetching news:', error))
+		//}
 
 		//ページ読み込み時にニュースを取得
-		window.onload = getNews;
+		//window.onload = getNews;
+
+		//ノート保存
+		//ノート保存
+				function saveNote() {
+					const noteContent = document.getElementById('note-content').value;
+		
+					fetch('/notes', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							content: noteContent //ノートの内容をcontentプロパティとして設定
+						})
+					})
+						.then(response => {
+							if (response.ok) { //保存が成功したとき
+								alert('Note saved successfully!');
+								const noteList = document.getElementById('note-list');
+								const listItem = document.createElement('li');
+								listItem.textContent = noteContent + '-' + new Date().toLocaleString();
+								noteList.appendChild(listItem);
+							} else { //失敗したとき
+								throw new Error('Failed to sav note…');
+							}
+						})
+						.catch(error => {
+							console.error('Error saving note', error);
+						});
+				}
+		
+				window.addEventListener('DOMContentLoaded', function(){
+					getNotes();
+				});
+				
+				function getNotes(){
+					fetch('/notes')
+					.then(response => response.json())
+					.then(notes => {
+						const noteList = document.getElementById('note-list');
+						//リストをクリア
+						noteList.innerHTML = ''; 
+						notes.forEach(note => {
+							const listItem = document.createElement('li');
+							//ノートの内容と作成日時の表示
+							listItem.textContent = note.content + '-' +note.createdAt;
+							noteList.appendChild(listItem);
+						});
+					})
+					.catch(error =>{
+						console.error('Error fetching notes',error);
+					});
+				}
+				
+				function clearTextArea(){
+					document.getElementById('note-content').value = '';
+				}
+
 	</script>
 </body>
 
